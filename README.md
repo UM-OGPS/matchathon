@@ -20,6 +20,13 @@ Output:
 1. Student schedule for the event (`student_schedule.csv`)
 1. Faculty schedule for the event (`faculty_schedule.csv`)
 
+## R package dependencies
+
+The matchathon R Shiny app depends on two libraries: shiny and tidyverse. To install these, you can run the following code in R or RStudio:
+```{r}
+install.packages(c("shiny", "tidyverse"))
+```
+
 ## Example
 
 Currently, you need to have RStudio downloaded on your computer to run this app. In the future, we will also host the app on a web server.
