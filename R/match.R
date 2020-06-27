@@ -58,6 +58,23 @@ rank_faculty = function(match_score){
               ranked_faculty_score=ranked_faculty_score))
 }
 
+#' Title
+#'
+#' @param am_mat 
+#' @param student 
+#' @param faculty 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+already_met = function(am_mat,student,faculty){
+  check_am = c(student,facult)
+  if(grep(student %in% am_mat[,1])){
+    
+  }
+}
+
 #' Make student schedule
 #'
 #' @param ranked_faculty dataframe returned from rank_faculty
@@ -98,7 +115,7 @@ make_student_schedule = function(ranked_faculty,slots=12){
       }
     }
   }
-  return(schedule)
+  return(schedule[,order(colnames(schedule))])
 }
 
 #' Title
@@ -112,24 +129,38 @@ make_student_schedule = function(ranked_faculty,slots=12){
 #'
 #' @examples
 add_min_fac_meetings = function(s_schedule,ranked_faculty,min_fac_mtg=nrow(s_schedule)/2){
+  # count number of meetings each faculty member has
   mtg_ct = table(unlist(s_schedule))
+  # order so the ones with the most come first
+  mtg_ct = sort(mtg_ct,decreasing = T)
+  # find faculty members with too few meetings
   too_few = names(mtg_ct)[mtg_ct < min_fac_mtg]
   s_sched_modified = s_schedule
   for(f in too_few){
+    # get which indices in array are given faculty member
     m_inds = which(ranked_faculty == f)
+    # first column is array index, second column is column number
     rc_inds = arrayInd(m_inds,dim(ranked_faculty))
+    # order by array index (i.e. by students that match best with faculty member)
     rc_inds = rc_inds[order(rc_inds[,1]),]
+    # loop over column indices (students)
     for(j in rc_inds[,2]){
+      # get student name
       s = colnames(ranked_faculty)[j]
+      # check if student already meeting with faculty
       if(f %in% s_schedule[,s]) next
+      # find worst match for student 
       current_ranks = which(ranked_faculty[,s] %in% s_schedule[,s])
       worst_match = current_ranks[length(current_ranks)]
       worst_match = ranked_faculty[,s][worst_match]
       wm_ind = which(s_schedule[,s] == worst_match)
-      f_scheduled = f %in% s_schedule[wm_ind,]
+      # check to see if facutly is already scheduled for that time slot
+      f_scheduled = f %in% s_sched_modified[wm_ind,]
+      # if faculty not scheduled for that time slot, replace student meeting with that faculty
       if(!f_scheduled){
         s_sched_modified[wm_ind,s] = f
       }
+      # stop when faculty has enough meetings
       if(sum(s_sched_modified == f) >= min_fac_mtg) break
     }
   }
@@ -158,7 +189,7 @@ make_faculty_schedule = function(student_schedule){
       }
     }
   }
-  return(schedule)
+  return(schedule[,order(colnames(schedule))])
 }
 
 #' Title
@@ -170,9 +201,12 @@ make_faculty_schedule = function(student_schedule){
 #' @export
 #'
 #' @examples
-matchathon = function(faculty_csv,students_csv,meeting_slots=12){
+matchathon = function(faculty_csv,students_csv,meeting_slots=12,min_fslots=NULL){
   n = 2
-  withProgress(message = '', value = 0, {
+  #withProgress(message = '', value = 0, {
+  # get minimum number of faculty meetings
+  if(is.null(min_fslots)) min_fslots = meeting_slots/2
+  if(min_fslots > meeting_slots) min_fslots = meeting_slots
   # read in faculty data
   f <- read.csv(faculty_csv)
   # read in student data
@@ -183,16 +217,17 @@ matchathon = function(faculty_csv,students_csv,meeting_slots=12){
   s_keep = c(names(s)[1],names(s)[names(s) %in% names(f)])
   s = s %>% select(s_keep)
   # get match scores
-  incProgress(0, detail = 'Getting match scores (1st of 3 tasks)')
+  #incProgress(0, detail = 'Getting match scores (1st of 3 tasks)')
   match_scores = get_match_scores(s,f)
   ranked_faculty = rank_faculty(match_scores)
-  incProgress(1/n, detail = 'Creating student schedule (2nd of 3 tasks)')
+  #incProgress(1/n, detail = 'Creating student schedule (2nd of 3 tasks)')
   s_schedule = make_student_schedule(ranked_faculty$ranked_faculty,slots=meeting_slots)
-  s_schedule = add_min_fac_meetings(s_schedule,ranked_faculty$ranked_faculty,min_fac_mtg=nrow(s_schedule)/2)
-  incProgress(1/n, detail = 'Creating faculty schedule (3rd of 3 tasks)')
+  s_schedule = add_min_fac_meetings(s_schedule,ranked_faculty$ranked_faculty,min_fac_mtg=min_fslots)
+  #incProgress(1/n, detail = 'Creating faculty schedule (3rd of 3 tasks)')
   f_schedule = make_faculty_schedule(s_schedule)
-  })
+  #})
   return(list(ranked_faculty=ranked_faculty$ranked_faculty,
+              ranked_faculty_score=ranked_faculty$ranked_faculty_score,
               s_schedule=s_schedule,
               f_schedule=f_schedule))
 }

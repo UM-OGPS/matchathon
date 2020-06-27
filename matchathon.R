@@ -17,16 +17,20 @@ ui <- fluidPage(
             fileInput("faculty", "Upload faculty spreadsheet", multiple = F),
             # Input: Select a file ----
             fileInput("students", "Upload student spreadsheet", multiple = F),
+            # Optional input: Select a file ----
+            fileInput("already_met","Upload spreadsheet of faculty students have already met with (optional)", multiple = F),
             # Choose number of meeting slots
             numericInput('slots', 'Number of meeting slots:', value=12, min=1),
-            # Minimum number of missing time slots for faculty
-            #numericInput('slots', 'Minumum number of faculty meetings:', value=slots/2, min=0, max = slots),
+            # Minimum number of faculty meetings
+            numericInput('fslots', 'Minumum number of faculty meetings (note: this outcome partially depends on the number of faculty and students being matched):', value=6, min=0),
             # Action button to run analysis
             uiOutput('go'),
             # Horizontal line ----
             tags$hr(),
             # Download buttons ----
             uiOutput("download_ranks"),
+            tags$div(tags$br()),
+            uiOutput("download_rank_vals"),
             tags$div(tags$br()),
             uiOutput("download_sschedule"),
             tags$div(tags$br()),
@@ -51,11 +55,12 @@ server <- function(input, output) {
         req(input$faculty)
         req(input$students)
         results = matchathon(input$faculty$datapath,input$students$datapath,
-                             meeting_slots = input$slots)
+                             meeting_slots = input$slots, min_fslots = input$fslots)
         return(results)
     })
     
     output$ranked_faculty <- renderTable({dat()$ranked_faculty},rownames=TRUE)
+    output$ranked_faculty_score <- renderTable({dat()$ranked_faculty_score},rownames=TRUE)
     output$s_schedule <- renderTable({dat()$s_schedule},rownames=TRUE)
     output$f_schedule <- renderTable({dat()$f_schedule},rownames=TRUE)
     
@@ -63,7 +68,7 @@ server <- function(input, output) {
     output$tabers<-renderUI({
         req(input$faculty, input$students, dat())
         tabsetPanel(type = "tabs",
-                    tabPanel("Top matches", tableOutput("ranked_faculty")),
+                    tabPanel("Ranked matches", tableOutput("ranked_faculty")),
                     tabPanel("Student schedule", tableOutput("s_schedule")),
                     tabPanel("Faculty schedule", tableOutput("f_schedule")))
     })
@@ -77,6 +82,15 @@ server <- function(input, output) {
         filename = 'ranked_faculty_matches.csv',
         content = function(file) {
             write.csv(dat()$ranked_faculty, file, row.names = TRUE)
+        })
+    output$download_rank_vals = renderUI({
+        req(input$faculty, input$students, dat())
+        downloadButton("download_rank_vals01",'Download rank values')
+    })
+    output$download_rank_vals01 <- downloadHandler(
+        filename = 'ranked_faculty_values.csv',
+        content = function(file) {
+            write.csv(dat()$ranked_faculty_score, file, row.names = TRUE)
         })
     output$download_sschedule = renderUI({
         req(input$faculty, input$students, dat())
