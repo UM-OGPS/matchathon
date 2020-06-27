@@ -203,7 +203,7 @@ make_faculty_schedule = function(student_schedule){
 #' @examples
 matchathon = function(faculty_csv,students_csv,meeting_slots=12,min_fslots=NULL){
   n = 2
-  #withProgress(message = '', value = 0, {
+  withProgress(message = '', value = 0, {
   # get minimum number of faculty meetings
   if(is.null(min_fslots)) min_fslots = meeting_slots/2
   if(min_fslots > meeting_slots) min_fslots = meeting_slots
@@ -217,15 +217,15 @@ matchathon = function(faculty_csv,students_csv,meeting_slots=12,min_fslots=NULL)
   s_keep = c(names(s)[1],names(s)[names(s) %in% names(f)])
   s = s %>% select(s_keep)
   # get match scores
-  #incProgress(0, detail = 'Getting match scores (1st of 3 tasks)')
+  incProgress(0, detail = 'Getting match scores (1st of 3 tasks)')
   match_scores = get_match_scores(s,f)
   ranked_faculty = rank_faculty(match_scores)
-  #incProgress(1/n, detail = 'Creating student schedule (2nd of 3 tasks)')
+  incProgress(1/n, detail = 'Creating student schedule (2nd of 3 tasks)')
   s_schedule = make_student_schedule(ranked_faculty$ranked_faculty,slots=meeting_slots)
   s_schedule = add_min_fac_meetings(s_schedule,ranked_faculty$ranked_faculty,min_fac_mtg=min_fslots)
-  #incProgress(1/n, detail = 'Creating faculty schedule (3rd of 3 tasks)')
+  incProgress(1/n, detail = 'Creating faculty schedule (3rd of 3 tasks)')
   f_schedule = make_faculty_schedule(s_schedule)
-  #})
+  })
   return(list(ranked_faculty=ranked_faculty$ranked_faculty,
               ranked_faculty_score=ranked_faculty$ranked_faculty_score,
               s_schedule=s_schedule,
