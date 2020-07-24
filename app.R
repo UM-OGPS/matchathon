@@ -19,6 +19,8 @@ ui <- fluidPage(
             fileInput("students", "Upload student spreadsheet", multiple = F),
             # Optional input: Select a file ----
             #fileInput("already_met","Upload spreadsheet of faculty students have already met with (optional)", multiple = F),
+            # Optional input: Select a file ----
+            fileInput("f_unavail","Upload spreadsheet of faculty unavailability times (optional)", multiple = F),
             # Choose number of meeting slots
             numericInput('slots', 'Number of meeting slots:', value=12, min=1),
             # Minimum number of faculty meetings
@@ -55,7 +57,7 @@ server <- function(input, output) {
         req(input$faculty)
         req(input$students)
         results = matchathon(input$faculty$datapath,input$students$datapath,
-                             meeting_slots = input$slots, min_fslots = input$fslots)
+                             meeting_slots = input$slots, min_fslots = input$fslots, f_unavail = input$f_unavail$datapath)
         return(results)
     })
     
