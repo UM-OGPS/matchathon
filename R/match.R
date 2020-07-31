@@ -75,7 +75,7 @@ already_met = function(am_mat,student,faculty){
   }
 }
 
-#' Title
+#' Check faculty availability
 #'
 #' @param f_unavail dataframe of faculty unavailability (columns: Faculty, Slots)
 #' @param f_name name of faculty to check
@@ -142,13 +142,13 @@ make_student_schedule = function(ranked_faculty,slots=12,f_unavail=NULL){
   return(schedule[,order(colnames(schedule))])
 }
 
-#' Title
+#' Ad minimum nuber of faculty meetings
 #'
-#' @param s_schedule 
-#' @param ranked_faculty 
-#' @param min_fac_mtg 
+#' @param s_schedule student schedule 
+#' @param ranked_faculty data frame of ranked faculty
+#' @param min_fac_mtg minimum number of faculty meetings
 #'
-#' @return
+#' @return updated student schedule
 #' @export
 #'
 #' @examples
@@ -195,7 +195,7 @@ add_min_fac_meetings = function(s_schedule,ranked_faculty,min_fac_mtg=nrow(s_sch
   return(s_sched_modified)
 }
 
-#' Title
+#' Add vaculty unavailability to schedule
 #'
 #' @param f_unavail dataframe of faculty unavailability (columns: Faculty, Slot)
 #' @param f_schedule faculty schedule (generated with make_faculty_schedule)
@@ -215,11 +215,11 @@ add_fac_unavail = function(f_unavail,f_schedule){
   return(f_schedule)
 }
 
-#' Title
+#' Make faculty schedule
 #'
 #' @param student_schedule 
 #'
-#' @return
+#' @return faculty schedule
 #' @export
 #'
 #' @examples
@@ -241,12 +241,12 @@ make_faculty_schedule = function(student_schedule){
   return(schedule[,order(colnames(schedule))])
 }
 
-#' Title
+#' Matchathon master function
 #'
-#' @param faculty_csv 
-#' @param students_csv 
+#' @param faculty_csv csv of faculty interests
+#' @param students_csv csv of student interests
 #'
-#' @return
+#' @return faculty and student schedules and ranked faculty lists for students
 #' @export
 #'
 #' @examples
