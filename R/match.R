@@ -223,7 +223,7 @@ add_fac_unavail = function(f_unavail,f_schedule){
 #' @export
 #'
 #' @examples
-make_faculty_schedule = function(student_schedule){
+make_faculty_schedule = function(student_schedule, f_unavail){
   # initialize schedule
   faculty = unique(unname(unlist(student_schedule)))
   schedule = data.frame(matrix(NA,nrow=nrow(student_schedule),
@@ -277,7 +277,7 @@ matchathon = function(faculty_csv,students_csv,meeting_slots=12,min_fslots=NULL,
   s_schedule = make_student_schedule(ranked_faculty$ranked_faculty,slots=meeting_slots,f_unavail=f_unavail)
   s_schedule = add_min_fac_meetings(s_schedule,ranked_faculty$ranked_faculty,min_fac_mtg=min_fslots,f_unavail=f_unavail)
   incProgress(1/n, detail = 'Creating faculty schedule (3rd of 3 tasks)')
-  f_schedule = make_faculty_schedule(s_schedule)
+  f_schedule = make_faculty_schedule(s_schedule,f_unavail=f_unavail)
   })
   return(list(ranked_faculty=ranked_faculty$ranked_faculty,
               ranked_faculty_score=ranked_faculty$ranked_faculty_score,
