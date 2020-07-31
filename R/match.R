@@ -75,16 +75,37 @@ already_met = function(am_mat,student,faculty){
   }
 }
 
+#' Check faculty availability
+#'
+#' @param f_unavail dataframe of faculty unavailability (columns: Faculty, Slots)
+#' @param f_name name of faculty to check
+#' @param slot time slot to check
+#'
+#' @return
+#' @export
+#'
+#' @examples
+check_fac_avail = function(f_unavail, f_name, slot){
+  if(is.null(f_unavail)){
+    f_avail = TRUE
+  }else{
+    f_un = f_unavail %>% dplyr::filter(Faculty == f_name) %>% filter(Slot == slot)
+    f_avail = nrow(f_un) == 0
+  }
+  return(f_avail)
+}
+
 #' Make student schedule
 #'
 #' @param ranked_faculty dataframe returned from rank_faculty
 #' @param slots number of slots in schedule
+#' @param f_unavail data frame of whether faculty are available to meet (columns: Faculty, Slot)
 #'
 #' @return student schedule
 #' @export
 #'
 #' @examples
-make_student_schedule = function(ranked_faculty,slots=12){
+make_student_schedule = function(ranked_faculty,slots=12,f_unavail=NULL){
   # set seed so results are same each time
   set.seed(0)
   # initialize schedule
@@ -103,8 +124,11 @@ make_student_schedule = function(ranked_faculty,slots=12){
       # identify empty spots for student
       s_empty = which(is.na(s_scheduled))
       if(length(s_empty) == 0) next 
-      #f_meet_ct = length(grep(f,schedule))
       for(i in s_empty){
+        # see if faculty is available at that time
+        f_avail = check_fac_avail(f_unavail, f, i)
+        # if faculty is unavailable, go to next time slot
+        if(!f_avail) next
         # see if faculty already has meeting during that time
         f_scheduled = f %in% schedule[i,]
         # if faculty doesn't already have meeting, schedule faculty meeting with student
@@ -118,17 +142,17 @@ make_student_schedule = function(ranked_faculty,slots=12){
   return(schedule[,order(colnames(schedule))])
 }
 
-#' Title
+#' Ad minimum nuber of faculty meetings
 #'
-#' @param s_schedule 
-#' @param ranked_faculty 
-#' @param min_fac_mtg 
+#' @param s_schedule student schedule 
+#' @param ranked_faculty data frame of ranked faculty
+#' @param min_fac_mtg minimum number of faculty meetings
 #'
-#' @return
+#' @return updated student schedule
 #' @export
 #'
 #' @examples
-add_min_fac_meetings = function(s_schedule,ranked_faculty,min_fac_mtg=nrow(s_schedule)/2){
+add_min_fac_meetings = function(s_schedule,ranked_faculty,min_fac_mtg=nrow(s_schedule)/2,f_unavail=NULL){
   # count number of meetings each faculty member has
   mtg_ct = table(unlist(s_schedule))
   # order so the ones with the most come first
@@ -154,6 +178,10 @@ add_min_fac_meetings = function(s_schedule,ranked_faculty,min_fac_mtg=nrow(s_sch
       worst_match = current_ranks[length(current_ranks)]
       worst_match = ranked_faculty[,s][worst_match]
       wm_ind = which(s_schedule[,s] == worst_match)
+      # see if faculty is available at that time
+      f_avail = check_fac_avail(f_unavail, f, wm_ind)
+      # if faculty is unavailable, go to next time slot
+      if(!f_avail) next
       # check to see if facutly is already scheduled for that time slot
       f_scheduled = f %in% s_sched_modified[wm_ind,]
       # if faculty not scheduled for that time slot, replace student meeting with that faculty
@@ -167,11 +195,31 @@ add_min_fac_meetings = function(s_schedule,ranked_faculty,min_fac_mtg=nrow(s_sch
   return(s_sched_modified)
 }
 
-#' Title
+#' Add vaculty unavailability to schedule
+#'
+#' @param f_unavail dataframe of faculty unavailability (columns: Faculty, Slot)
+#' @param f_schedule faculty schedule (generated with make_faculty_schedule)
+#'
+#' @return faculty schedule with unavailability documented
+#' @export
+#'
+#' @examples
+add_fac_unavail = function(f_unavail,f_schedule){
+  if(!is.null(f_unavail)){
+    for(row in 1:nrow(f_unavail)){
+      fac = as.character(f_unavail[row,'Faculty'])
+      slot = as.numeric(f_unavail[row,'Slot'])
+      f_schedule[slot,fac] = 'Unavailable'
+    }
+  }
+  return(f_schedule)
+}
+
+#' Make faculty schedule
 #'
 #' @param student_schedule 
 #'
-#' @return
+#' @return faculty schedule
 #' @export
 #'
 #' @examples
@@ -189,28 +237,33 @@ make_faculty_schedule = function(student_schedule){
       }
     }
   }
+  schedule = add_fac_unavail(f_unavail,schedule)
   return(schedule[,order(colnames(schedule))])
 }
 
-#' Title
+#' Matchathon master function
 #'
-#' @param faculty_csv 
-#' @param students_csv 
+#' @param faculty_csv csv of faculty interests
+#' @param students_csv csv of student interests
 #'
-#' @return
+#' @return faculty and student schedules and ranked faculty lists for students
 #' @export
 #'
 #' @examples
-matchathon = function(faculty_csv,students_csv,meeting_slots=12,min_fslots=NULL){
+matchathon = function(faculty_csv,students_csv,meeting_slots=12,min_fslots=NULL,f_unavail=NULL){
   n = 2
   withProgress(message = '', value = 0, {
   # get minimum number of faculty meetings
   if(is.null(min_fslots)) min_fslots = meeting_slots/2
   if(min_fslots > meeting_slots) min_fslots = meeting_slots
   # read in faculty data
-  f <- read.csv(faculty_csv)
+  f <- read_csv(faculty_csv)
   # read in student data
-  s <- read.csv(students_csv)
+  s <- read_csv(students_csv)
+  # read in faculty availability
+  if(!is.null(f_unavail)){
+    f_unavail <- read_csv(f_unavail)
+  }
   # keep only names and columns in both 
   f_keep = c(names(f)[1],names(f)[names(f) %in% names(s)])
   f = f %>% select(f_keep)
@@ -221,8 +274,8 @@ matchathon = function(faculty_csv,students_csv,meeting_slots=12,min_fslots=NULL)
   match_scores = get_match_scores(s,f)
   ranked_faculty = rank_faculty(match_scores)
   incProgress(1/n, detail = 'Creating student schedule (2nd of 3 tasks)')
-  s_schedule = make_student_schedule(ranked_faculty$ranked_faculty,slots=meeting_slots)
-  s_schedule = add_min_fac_meetings(s_schedule,ranked_faculty$ranked_faculty,min_fac_mtg=min_fslots)
+  s_schedule = make_student_schedule(ranked_faculty$ranked_faculty,slots=meeting_slots,f_unavail=f_unavail)
+  s_schedule = add_min_fac_meetings(s_schedule,ranked_faculty$ranked_faculty,min_fac_mtg=min_fslots,f_unavail=f_unavail)
   incProgress(1/n, detail = 'Creating faculty schedule (3rd of 3 tasks)')
   f_schedule = make_faculty_schedule(s_schedule)
   })
