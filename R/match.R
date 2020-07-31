@@ -62,14 +62,13 @@ rank_faculty = function(match_score){
 #'
 #' @param am dataframe with student names as the first column and faculty names as the second column. Student names can be repeated.
 #' @param ranked_faculty dataframe with student names as column names
-#' @param students dataframe where each row is a student and each column is a research interest. First column is student names.
 #' @param faculty dataframe where each row is a faculty member and each column is a research interest. First column is faculty names. 
 #'
 #' @return
 #' @export
 #'
 #' @examples
-already_met = function( am, rf, students, faculty ){
+already_met = function( am, rf, faculty ){
   
   #first lets convert faculty names to lowercase to remove case sensitivity
   #shouldn't need to do this for student names ( right? ) since they're from the same form (ie the students don't have a chance to type diff names )
