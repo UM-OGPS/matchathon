@@ -1,9 +1,6 @@
 # Matchathon app
 
-# Load libraries ----
-library(shiny)
-library(tidyverse)
-source('R/match.R')
+library(matchathon)
 
 # Define UI ---- 
 ui <- fluidPage(

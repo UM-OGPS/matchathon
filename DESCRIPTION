@@ -1,0 +1,30 @@
+Package: matchathon
+Title: Generates Schedules for Matchathon Event
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Zena",
+           family = "Lapp",
+           role = c("aut", "cre"),
+           email = "zenalapp@umich.edu",
+           comment = c(ORCID = "0000-0003-4674-2176"))
+    person(given = "Haley",
+           family = "Amemiya",
+           role = c("aut", "cre"),
+           email = "hamemiya@umich.edu")
+    person(given = "Cathy",
+           family = "Smith",
+           role = c("aut", "cre"),
+           email = "smithcat@umich.edu")
+    person(given = "Maggie",
+           family = "Durdan",
+           role = c("aut", "cre"),
+           email = "mdurdan@umich.edu")
+Description: Matches students and faculty based on research interests and creates a schedule for a matchathon event.
+License: `use_mit_license()`
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Imports:
+    shiny,
+    tidyverse
