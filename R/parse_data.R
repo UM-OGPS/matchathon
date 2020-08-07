@@ -65,6 +65,10 @@ parse_data = function( faculty_file,
   #moves Name to front of df
   student = student[ , c( length( names( student ) ), 1:length( names( student ) ) -1 ) ]
   
+  if ( !( all( names( faculty ) == names( student ) ) ) ){
+    print( 'Column names do not match between students and faculty - You are in danger!' )
+  }
+  
   return( list( 'faculty' = faculty, 'student' = student ) )
   
 }
