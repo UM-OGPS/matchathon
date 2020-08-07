@@ -53,8 +53,9 @@ server <- function(input, output) {
     dat <- eventReactive(input$go01, {
         req(input$faculty)
         req(input$students)
-        results = matchathon(input$faculty$datapath,input$students$datapath,
-                             meeting_slots = input$slots, min_fslots = input$fslots, f_unavail = input$f_unavail$datapath)
+        dfs = read_in_data(input$faculty$datapath,input$students$datapath,input$f_unavail$datapath,input$already_met$datapath)
+        results = matchathon(dfs$faculty_df,dfs$student_df,
+                             meeting_slots = input$slots, min_fslots = input$fslots, f_unavail = dfs$f_unavail)
         return(results)
     })
     

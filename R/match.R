@@ -16,8 +16,8 @@ get_match_scores = function(students, faculty, already_met=NULL){
   f_keep = colnames(faculty)[colnames(faculty) %in% colnames(students)[2:ncol(students)]]
   snames = unlist(students[,1])
   s_keep = colnames(students)[colnames(students) %in% colnames(faculty)[2:ncol(faculty)]]
-  faculty = faculty %>% select(f_keep)
-  students = students %>% select(s_keep)
+  faculty = faculty %>% dplyr::select(f_keep)
+  students = students %>% dplyr::select(s_keep)
   # matrix of student by faculty to populate with fraction overlap
   match_score = matrix(NA,nrow=nrow(students),ncol=nrow(faculty))
   # fraction of overlap between faculty and students
@@ -129,7 +129,7 @@ check_fac_avail = function(f_unavail, f_name, slot){
   if(is.null(f_unavail)){
     f_avail = TRUE
   }else{
-    f_un = f_unavail %>% dplyr::filter(Faculty == f_name) %>% filter(Slot == slot)
+    f_un = f_unavail %>% dplyr::filter(Faculty == f_name) %>% dplyr::filter(Slot == slot)
     f_avail = nrow(f_un) == 0
   }
   return(f_avail)
@@ -281,6 +281,32 @@ make_faculty_schedule = function(student_schedule, f_unavail){
   return(schedule[,order(colnames(schedule))])
 }
 
+#' Read in csvs
+#'
+#' @param faculty_csv csv of faculty interests
+#' @param student_csv csv of student interests
+#' @param f_unavail csv of faculty unavailability
+#' @param already_met csv of faculty students have already met with
+#'
+#' @return list with dataframes for each csv
+#' @export
+#'
+#' @examples
+read_in_data <- function(faculty_csv,student_csv,f_unavail_csv=NULL,already_met_csv=NULL){
+  # read in faculty data
+  f <- readr::read_csv(faculty_csv)
+  # read in student data
+  s <- readr::read_csv(students_csv)
+  # read in faculty availability
+  if(!is.null(f_unavail)){
+    f_unavail <- readr::read_csv(f_unavail_csv)
+  }
+  if(!is.null(already_met)){
+    already_met <- readr::read_csv(already_met_csv)
+  }
+  return(list(faculty=f,student=s,f_unavail=f_unavail,already_met=already_met))
+}
+
 #' Matchathon master function
 #'
 #' @param faculty_csv csv of faculty interests
@@ -290,35 +316,31 @@ make_faculty_schedule = function(student_schedule, f_unavail){
 #' @export
 #'
 #' @examples
-matchathon = function(faculty_csv,students_csv,meeting_slots=12,min_fslots=NULL,f_unavail=NULL){
+matchathon = function(faculty_df,students_df,meeting_slots=12,min_fslots=NULL,f_unavail_df=NULL,already_met_df=NULL){
   n = 2
-  withProgress(message = '', value = 0, {
+  #shiny::withProgress(message = '', value = 0, {
   # get minimum number of faculty meetings
   if(is.null(min_fslots)) min_fslots = meeting_slots/2
   if(min_fslots > meeting_slots) min_fslots = meeting_slots
-  # read in faculty data
-  f <- read_csv(faculty_csv)
-  # read in student data
-  s <- read_csv(students_csv)
-  # read in faculty availability
-  if(!is.null(f_unavail)){
-    f_unavail <- read_csv(f_unavail)
-  }
+  
+  f = faculty_df
+  s = student_df
+
   # keep only names and columns in both 
   f_keep = c(names(f)[1],names(f)[names(f) %in% names(s)])
-  f = f %>% select(f_keep)
+  f = f %>% dplyr::select(f_keep)
   s_keep = c(names(s)[1],names(s)[names(s) %in% names(f)])
-  s = s %>% select(s_keep)
+  s = s %>% dplyr::select(s_keep)
   # get match scores
-  incProgress(0, detail = 'Getting match scores (1st of 3 tasks)')
-  match_scores = get_match_scores(s,f)
+  #incProgress(0, detail = 'Getting match scores (1st of 3 tasks)')
+  match_scores = get_match_scores(s,f,already_met = already_met_df)
   ranked_faculty = rank_faculty(match_scores)
-  incProgress(1/n, detail = 'Creating student schedule (2nd of 3 tasks)')
-  s_schedule = make_student_schedule(ranked_faculty$ranked_faculty,slots=meeting_slots,f_unavail=f_unavail)
-  s_schedule = add_min_fac_meetings(s_schedule,ranked_faculty$ranked_faculty,min_fac_mtg=min_fslots,f_unavail=f_unavail)
-  incProgress(1/n, detail = 'Creating faculty schedule (3rd of 3 tasks)')
-  f_schedule = make_faculty_schedule(s_schedule,f_unavail=f_unavail)
-  })
+  #incProgress(1/n, detail = 'Creating student schedule (2nd of 3 tasks)')
+  s_schedule = make_student_schedule(ranked_faculty$ranked_faculty,slots=meeting_slots,f_unavail=f_unavail_df)
+  s_schedule = add_min_fac_meetings(s_schedule,ranked_faculty$ranked_faculty,min_fac_mtg=min_fslots,f_unavail=f_unavail_df)
+  #incProgress(1/n, detail = 'Creating faculty schedule (3rd of 3 tasks)')
+  f_schedule = make_faculty_schedule(s_schedule,f_unavail=f_unavail_df)
+  #})
   return(list(ranked_faculty=ranked_faculty$ranked_faculty,
               ranked_faculty_score=ranked_faculty$ranked_faculty_score,
               s_schedule=s_schedule,

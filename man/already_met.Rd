@@ -2,20 +2,20 @@
 % Please edit documentation in R/match.R
 \name{already_met}
 \alias{already_met}
-\title{Title}
+\title{Remove faculty the student already met with}
 \usage{
-already_met(am_mat, student, faculty)
+already_met(am, rf, faculty)
 }
 \arguments{
-\item{am_mat}{}
+\item{am}{dataframe with student names as the first column and faculty names as the second column. Student names can be repeated.}
 
-\item{student}{}
+\item{faculty}{dataframe where each row is a faculty member and each column is a research interest. First column is faculty names.}
 
-\item{faculty}{}
+\item{ranked_faculty}{dataframe with student names as column names}
 }
 \value{
 
 }
 \description{
-Title
+Remove faculty the student already met with
 }
