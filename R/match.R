@@ -58,21 +58,61 @@ rank_faculty = function(match_score){
               ranked_faculty_score=ranked_faculty_score))
 }
 
-#' Title
+#' Remove faculty the student already met with
 #'
-#' @param am_mat 
-#' @param student 
-#' @param faculty 
+#' @param am dataframe with student names as the first column and faculty names as the second column. Student names can be repeated.
+#' @param ranked_faculty dataframe with student names as column names
+#' @param faculty dataframe where each row is a faculty member and each column is a research interest. First column is faculty names. 
 #'
 #' @return
 #' @export
 #'
 #' @examples
-already_met = function(am_mat,student,faculty){
-  check_am = c(student,facult)
-  if(grep(student %in% am_mat[,1])){
+already_met = function( am, rf, faculty ){
+  
+  #first lets convert faculty names to lowercase to remove case sensitivity
+  #shouldn't need to do this for student names ( right? ) since they're from the same form (ie the students don't have a chance to type diff names )
+  faculty_names = faculty %>% pull( 1 )
+  faculty_names_l = tolower( faculty_names )
+  am_fac_l = tolower( am %>% pull( 2 ) )
+  
+  #copy already met so we don't screw around with original
+  #am_c = am
+  
+  #extract student name headers from ranked faculty mat
+  student_names_col = dimnames( rf$ranked_faculty )[[ 2 ]]
+  
+  #get a vector indicating columns of ranked_faculty corresponding to student names in already met
+  am = am %>% add_column( rf_col_num = match( ( am %>% pull( 1 ) ), student_names_col ) )
+  
+  #if the student names don't match this is a bust - throw an error
+  #maybe this functionality could be better and throw a warning instead but for now stop the process
+  if( any( is.na( am %>% pull( rf_col_num ) ) ) ){
+    stop( "The student names in already met and ranked faculty don't match" )
+  }
+  
+  num_faculty = dim( rf$ranked_faculty )[ 1 ]
+  for( i in 1:length( am_fac_l ) ) {
+    
+    if ( am_fac_l[i] %in% faculty_names_l ){
+      rf_col = am[ i, 3 ][[ 1 ]]
+      fname = faculty_names[ which( faculty_names_l == am_fac_l[i] ) ]
+      frow_in_rf = which( rf$ranked_faculty[ , rf_col ] == fname )
+      rf_resorted_col = c( rf$ranked_faculty[ 1:( frow_in_rf - 1 ), rf_col ], 
+                        rf$ranked_faculty[ ( frow_in_rf + 1 ):num_faculty, rf_col ], 
+                        rf$ranked_faculty[ frow_in_rf, rf_col ] )
+      rf$ranked_faculty[ , rf_col ] = rf_resorted_col
+      rfs_resorted_col = c( rf$ranked_faculty_score[ 1:( frow_in_rf - 1 ), rf_col ], 
+                           rf$ranked_faculty_score[ ( frow_in_rf + 1 ):num_faculty, rf_col ], 
+                           rf$ranked_faculty_score[ frow_in_rf, rf_col ] )
+      rf$ranked_faculty_score[ , rf_col ] = rfs_resorted_col
+    }else{
+      print( 'Faculty name not found' )
+    }
     
   }
+  
+  return( rf )
 }
 
 #' Check faculty availability
