@@ -107,6 +107,7 @@ already_met = function( am, rf, faculty ){
                            rf$ranked_faculty_score[ frow_in_rf, rf_col ] )
       rf$ranked_faculty_score[ , rf_col ] = rfs_resorted_col
     }else{
+      print( i )
       print( 'Faculty name not found' )
     }
     
