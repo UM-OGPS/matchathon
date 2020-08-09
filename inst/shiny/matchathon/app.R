@@ -1,9 +1,6 @@
 # Matchathon app
 
-# Load libraries ----
-library(shiny)
-library(tidyverse)
-source('R/match.R')
+#library(matchathon)
 
 # Define UI ---- 
 ui <- fluidPage(
@@ -18,7 +15,7 @@ ui <- fluidPage(
             # Input: Select a file ----
             fileInput("students", "Upload student spreadsheet", multiple = F),
             # Optional input: Select a file ----
-            #fileInput("already_met","Upload spreadsheet of faculty students have already met with (optional)", multiple = F),
+            fileInput("already_met","Upload spreadsheet of faculty students have already met with (optional)", multiple = F),
             # Optional input: Select a file ----
             fileInput("f_unavail","Upload spreadsheet of faculty unavailability times (optional)", multiple = F),
             # Choose number of meeting slots
@@ -56,8 +53,9 @@ server <- function(input, output) {
     dat <- eventReactive(input$go01, {
         req(input$faculty)
         req(input$students)
-        results = matchathon(input$faculty$datapath,input$students$datapath,
-                             meeting_slots = input$slots, min_fslots = input$fslots, f_unavail = input$f_unavail$datapath)
+        dfs = read_in_data(input$faculty$datapath,input$students$datapath,input$f_unavail$datapath,input$already_met$datapath)
+        results = matchathon(dfs$faculty,dfs$student,
+                             meeting_slots = input$slots, min_fslots = input$fslots, f_unavail_df = dfs$f_unavail, already_met_df = dfs$already_met)
         return(results)
     })
     
