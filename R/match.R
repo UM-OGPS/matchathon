@@ -4,13 +4,10 @@
 #'
 #' @param students dataframe where each row is a student and each column is a research interest. First column is student names.
 #' @param faculty dataframe where each row is a faculty member and each column is a research interest. First column is faculty names.
-#' @param already_met named list of students with faculty the students have met as elements in the list.
 #'
 #' @return dataframe where rows are students and columns are faculty and elements are a score of how well the student and faculty research interests align. Higher scores indicate more mutual research interests.
 #' @export
-#'
-#' @examples
-get_match_scores = function(students, faculty, already_met=NULL){
+get_match_scores = function(students, faculty){
   # keep only names and columns in both 
   fnames = unlist(faculty[,1])
   f_keep = colnames(faculty)[colnames(faculty) %in% colnames(students)[2:ncol(students)]]
@@ -42,8 +39,6 @@ get_match_scores = function(students, faculty, already_met=NULL){
 #'
 #' @return For each student (column), faculty with mutual interests ordered by match score.
 #' @export
-#'
-#' @examples
 rank_faculty = function(match_score){
   ranked_faculty = apply(match_score,1,function(x){
     colnames(match_score)[order(x,decreasing = T)]
@@ -61,20 +56,18 @@ rank_faculty = function(match_score){
 #' Remove faculty the student already met with
 #'
 #' @param am dataframe with student names as the first column and faculty names as the second column. Student names can be repeated.
-#' @param ranked_faculty dataframe with student names as column names
+#' @param rf dataframe with student names as column names
 #' @param faculty dataframe where each row is a faculty member and each column is a research interest. First column is faculty names. 
 #'
 #' @return
 #' @export
-#'
-#' @examples
 already_met = function( am, rf, faculty ){
   
   #first lets convert faculty names to lowercase to remove case sensitivity
   #shouldn't need to do this for student names ( right? ) since they're from the same form (ie the students don't have a chance to type diff names )
-  faculty_names = faculty %>% pull( 1 )
+  faculty_names = faculty %>% dplyr::pull( 1 )
   faculty_names_l = tolower( faculty_names )
-  am_fac_l = tolower( am %>% pull( 2 ) )
+  am_fac_l = tolower( am %>% dplyr::pull( 2 ) )
   
   #copy already met so we don't screw around with original
   #am_c = am
@@ -83,11 +76,11 @@ already_met = function( am, rf, faculty ){
   student_names_col = dimnames( rf$ranked_faculty )[[ 2 ]]
   
   #get a vector indicating columns of ranked_faculty corresponding to student names in already met
-  am = am %>% add_column( rf_col_num = match( ( am %>% pull( 1 ) ), student_names_col ) )
+  am = am %>% tibble::add_column( rf_col_num = match( ( am %>% dplyr::pull( 1 ) ), student_names_col ) )
   
   #if the student names don't match this is a bust - throw an error
   #maybe this functionality could be better and throw a warning instead but for now stop the process
-  if( any( is.na( am %>% pull( rf_col_num ) ) ) ){
+  if( any( is.na( am %>% dplyr::pull( rf_col_num ) ) ) ){
     stop( "The student names in already met and ranked faculty don't match" )
   }
   
@@ -98,14 +91,13 @@ already_met = function( am, rf, faculty ){
       rf_col = am[ i, 3 ][[ 1 ]]
       fname = faculty_names[ which( faculty_names_l == am_fac_l[i] ) ]
       frow_in_rf = which( rf$ranked_faculty[ , rf_col ] == fname )
-      rf_resorted_col = c( rf$ranked_faculty[ 1:( frow_in_rf - 1 ), rf_col ], 
-                        rf$ranked_faculty[ ( frow_in_rf + 1 ):num_faculty, rf_col ], 
-                        rf$ranked_faculty[ frow_in_rf, rf_col ] )
+      f_vec = rf$ranked_faculty[, rf_col]
+      rf_resorted_col = c(f_vec[f_vec != fname],f_vec[frow_in_rf])
+      #rf_resorted_col = c( rf$ranked_faculty[ 1:( frow_in_rf - 1 ), rf_col ], 
+      #                  rf$ranked_faculty[ ( frow_in_rf + 1 ):num_faculty, rf_col ], 
+      #                  rf$ranked_faculty[ frow_in_rf, rf_col ] )
       rf$ranked_faculty[ , rf_col ] = rf_resorted_col
-      rfs_resorted_col = c( rf$ranked_faculty_score[ 1:( frow_in_rf - 1 ), rf_col ], 
-                           rf$ranked_faculty_score[ ( frow_in_rf + 1 ):num_faculty, rf_col ], 
-                           rf$ranked_faculty_score[ frow_in_rf, rf_col ] )
-      rf$ranked_faculty_score[ , rf_col ] = rfs_resorted_col
+      rf$ranked_faculty_score[ , rf_col ] = rf_resorted_col
     }else{
       print( 'Faculty name not found' )
     }
@@ -123,8 +115,6 @@ already_met = function( am, rf, faculty ){
 #'
 #' @return
 #' @export
-#'
-#' @examples
 check_fac_avail = function(f_unavail, f_name, slot){
   if(is.null(f_unavail)){
     f_avail = TRUE
@@ -143,8 +133,6 @@ check_fac_avail = function(f_unavail, f_name, slot){
 #'
 #' @return student schedule
 #' @export
-#'
-#' @examples
 make_student_schedule = function(ranked_faculty,slots=12,f_unavail=NULL){
   # set seed so results are same each time
   set.seed(0)
@@ -187,11 +175,10 @@ make_student_schedule = function(ranked_faculty,slots=12,f_unavail=NULL){
 #' @param s_schedule student schedule 
 #' @param ranked_faculty data frame of ranked faculty
 #' @param min_fac_mtg minimum number of faculty meetings
+#' @param f_unavail dataframe of faculty unavailability (name, time slot)
 #'
 #' @return updated student schedule
 #' @export
-#'
-#' @examples
 add_min_fac_meetings = function(s_schedule,ranked_faculty,min_fac_mtg=nrow(s_schedule)/2,f_unavail=NULL){
   # count number of meetings each faculty member has
   mtg_ct = table(unlist(s_schedule))
@@ -242,8 +229,6 @@ add_min_fac_meetings = function(s_schedule,ranked_faculty,min_fac_mtg=nrow(s_sch
 #'
 #' @return faculty schedule with unavailability documented
 #' @export
-#'
-#' @examples
 add_fac_unavail = function(f_unavail,f_schedule){
   if(!is.null(f_unavail)){
     for(row in 1:nrow(f_unavail)){
@@ -257,12 +242,11 @@ add_fac_unavail = function(f_unavail,f_schedule){
 
 #' Make faculty schedule
 #'
-#' @param student_schedule 
+#' @param student_schedule student schedule (generated with make_student_schedule)
+#' @param f_unavail dataframe of faculty unavailability (name, time slot)
 #'
 #' @return faculty schedule
 #' @export
-#'
-#' @examples
 make_faculty_schedule = function(student_schedule, f_unavail){
   # initialize schedule
   faculty = unique(unname(unlist(student_schedule)))
@@ -285,23 +269,23 @@ make_faculty_schedule = function(student_schedule, f_unavail){
 #'
 #' @param faculty_csv csv of faculty interests
 #' @param student_csv csv of student interests
-#' @param f_unavail csv of faculty unavailability
-#' @param already_met csv of faculty students have already met with
+#' @param f_unavail_csv csv of faculty unavailability
+#' @param already_met_csv csv of faculty students have already met with
 #'
 #' @return list with dataframes for each csv
 #' @export
-#'
-#' @examples
 read_in_data <- function(faculty_csv,student_csv,f_unavail_csv=NULL,already_met_csv=NULL){
   # read in faculty data
   f <- readr::read_csv(faculty_csv)
   # read in student data
-  s <- readr::read_csv(students_csv)
+  s <- readr::read_csv(student_csv)
   # read in faculty availability
-  if(!is.null(f_unavail)){
+  f_unavail <- NULL
+  if(!is.null(f_unavail_csv)){
     f_unavail <- readr::read_csv(f_unavail_csv)
   }
-  if(!is.null(already_met)){
+  already_met <- NULL
+  if(!is.null(already_met_csv)){
     already_met <- readr::read_csv(already_met_csv)
   }
   return(list(faculty=f,student=s,f_unavail=f_unavail,already_met=already_met))
@@ -309,14 +293,16 @@ read_in_data <- function(faculty_csv,student_csv,f_unavail_csv=NULL,already_met_
 
 #' Matchathon master function
 #'
-#' @param faculty_csv csv of faculty interests
-#' @param students_csv csv of student interests
+#' @param faculty_df csv of faculty interests
+#' @param student_df csv of student interests
+#' @param meeting_slots number of meeting slots 
+#' @param min_fslots minimum number of faculty meeting slots not empty
+#' @param f_unavail_df dataframe of faculty unavailability (name, time slot)
+#' @param already_met_df dataframe of faculty students have already met with (student name, faculty name)
 #'
 #' @return faculty and student schedules and ranked faculty lists for students
 #' @export
-#'
-#' @examples
-matchathon = function(faculty_df,students_df,meeting_slots=12,min_fslots=NULL,f_unavail_df=NULL,already_met_df=NULL){
+matchathon = function(faculty_df,student_df,meeting_slots=12,min_fslots=NULL,f_unavail_df=NULL,already_met_df=NULL){
   n = 2
   #shiny::withProgress(message = '', value = 0, {
   # get minimum number of faculty meetings
@@ -333,16 +319,20 @@ matchathon = function(faculty_df,students_df,meeting_slots=12,min_fslots=NULL,f_
   s = s %>% dplyr::select(s_keep)
   # get match scores
   #incProgress(0, detail = 'Getting match scores (1st of 3 tasks)')
-  match_scores = get_match_scores(s,f,already_met = already_met_df)
+  match_scores = get_match_scores(s,f)
   ranked_faculty = rank_faculty(match_scores)
+  ranked_faculty_orig <- ranked_faculty
+  if(!is.null(already_met_df)){
+    ranked_faculty <- already_met(already_met_df, ranked_faculty, f)
+  }
   #incProgress(1/n, detail = 'Creating student schedule (2nd of 3 tasks)')
   s_schedule = make_student_schedule(ranked_faculty$ranked_faculty,slots=meeting_slots,f_unavail=f_unavail_df)
   s_schedule = add_min_fac_meetings(s_schedule,ranked_faculty$ranked_faculty,min_fac_mtg=min_fslots,f_unavail=f_unavail_df)
   #incProgress(1/n, detail = 'Creating faculty schedule (3rd of 3 tasks)')
   f_schedule = make_faculty_schedule(s_schedule,f_unavail=f_unavail_df)
   #})
-  return(list(ranked_faculty=ranked_faculty$ranked_faculty,
-              ranked_faculty_score=ranked_faculty$ranked_faculty_score,
+  return(list(ranked_faculty=ranked_faculty_orig$ranked_faculty,
+              ranked_faculty_score=ranked_faculty_orig$ranked_faculty_score,
               s_schedule=s_schedule,
               f_schedule=f_schedule))
 }

@@ -5,17 +5,26 @@
 \title{Matchathon master function}
 \usage{
 matchathon(
-  faculty_csv,
-  students_csv,
+  faculty_df,
+  student_df,
   meeting_slots = 12,
   min_fslots = NULL,
-  f_unavail = NULL
+  f_unavail_df = NULL,
+  already_met_df = NULL
 )
 }
 \arguments{
-\item{faculty_csv}{csv of faculty interests}
+\item{faculty_df}{csv of faculty interests}
 
-\item{students_csv}{csv of student interests}
+\item{student_df}{csv of student interests}
+
+\item{meeting_slots}{number of meeting slots}
+
+\item{min_fslots}{minimum number of faculty meeting slots not empty}
+
+\item{f_unavail_df}{dataframe of faculty unavailability (name, time slot)}
+
+\item{already_met_df}{dataframe of faculty students have already met with (student name, faculty name)}
 }
 \value{
 faculty and student schedules and ranked faculty lists for students

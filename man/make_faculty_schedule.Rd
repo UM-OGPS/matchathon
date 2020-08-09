@@ -7,7 +7,9 @@
 make_faculty_schedule(student_schedule, f_unavail)
 }
 \arguments{
-\item{student_schedule}{}
+\item{student_schedule}{student schedule (generated with make_student_schedule)}
+
+\item{f_unavail}{dataframe of faculty unavailability (name, time slot)}
 }
 \value{
 faculty schedule

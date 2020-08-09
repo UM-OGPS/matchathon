@@ -4,14 +4,12 @@
 \alias{get_match_scores}
 \title{Get match scores}
 \usage{
-get_match_scores(students, faculty, already_met = NULL)
+get_match_scores(students, faculty)
 }
 \arguments{
 \item{students}{dataframe where each row is a student and each column is a research interest. First column is student names.}
 
 \item{faculty}{dataframe where each row is a faculty member and each column is a research interest. First column is faculty names.}
-
-\item{already_met}{named list of students with faculty the students have met as elements in the list.}
 }
 \value{
 dataframe where rows are students and columns are faculty and elements are a score of how well the student and faculty research interests align. Higher scores indicate more mutual research interests.

@@ -17,6 +17,8 @@ add_min_fac_meetings(
 \item{ranked_faculty}{data frame of ranked faculty}
 
 \item{min_fac_mtg}{minimum number of faculty meetings}
+
+\item{f_unavail}{dataframe of faculty unavailability (name, time slot)}
 }
 \value{
 updated student schedule
