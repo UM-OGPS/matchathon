@@ -1,7 +1,7 @@
 # Matchathon
 R Shiny app to match two sets of people based on mutual interests (e.g. students and faculty based on research interest)
 
-Created for the Matchathon event for the Program in Biomedical Sciences (PIBS) incoming first-year student Matchathon event.
+Created for the Program in Biomedical Sciences (PIBS) incoming first-year student Matchathon event at the University of Michigan.
 
 To help students find faculty members with mutual research interests, we use this algorithm to match first-year PhD students and faculty who are in search of trainees based on mutual research interests. Then these students and faculty meet during a two hour Matchathon event. At the event students meet individually with 12 different faculty members for 5 minutes each. 
 
