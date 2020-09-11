@@ -6,6 +6,7 @@
 #' @return faculty schedule with unavailability documented
 #' @export
 add_fac_unavail = function(f_unavail,f_schedule){
+  f_unavail <- f_unavail[f_unavail$Slot <= nrow(f_schedule),]
   if(!is.null(f_unavail)){
     for(row in 1:nrow(f_unavail)){
       fac = as.character(f_unavail[row,'Faculty'])
