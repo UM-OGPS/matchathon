@@ -16,13 +16,14 @@ add_min_fac_meetings = function(s_schedule,ranked_faculty,min_fac_mtg=nrow(s_sch
   # too_many = names(mtg_ct)[mtg_ct == nrow(s_schedule)]
   # # find faculty members with too few meetings
   # too_few = names(mtg_ct)[mtg_ct < min_fac_mtg]
+  fac <- unique(unlist(c(ranked_faculty)))
   s_sched_modified = s_schedule
   ct = 0
-  while(min(table(unlist(s_sched_modified))) < min_fac_mtg){
-    # count number of meetings each faculty member has
-    mtg_ct = table(unlist(s_sched_modified))
+  # count number of meetings each faculty member has
+  mtg_ct = table(factor(unlist(s_sched_modified),levels=fac))
+  while(min(table(factor(unlist(s_sched_modified),levels=fac))) < min_fac_mtg){
     # order so the ones with the most come first
-    mtg_ct = sort(mtg_ct,decreasing = T)
+    mtg_ct = sort(table(factor(unlist(s_sched_modified),levels=fac)),decreasing = T)
     # find faculty members with too few meetings
     too_few = names(mtg_ct)[mtg_ct < min_fac_mtg]
     for(f in too_few){
@@ -36,6 +37,7 @@ add_min_fac_meetings = function(s_schedule,ranked_faculty,min_fac_mtg=nrow(s_sch
       for(j in rc_inds[,2]){
         # get student name
         s = colnames(ranked_faculty)[j]
+        if(!s %in% names(s_sched_modified)) next
         # check if student already meeting with faculty
         if(f %in% s_sched_modified[,s]) next
         # find worst match for student 

@@ -1,7 +1,7 @@
 library(tidyverse)
 library(here)
 
-source(here('R/match.R'))
+source(here('R/matchathon.R'))
 
 # student interests
 students = read_csv(here('data-raw/students.csv'))
@@ -39,7 +39,7 @@ ranked_faculty = rank_faculty(match_scores)
 # student schedule (any number of faculty meetings)
 s_schedule_orig = make_student_schedule(ranked_faculty$ranked_faculty,slots=3,f_unavail=f_unavail)
 # faculty schedule(any number of faculty meetings)
-f_schedule_orig = make_faculty_schedule(s_schedule_orig,f_unavail = f_unavail[c(1,3),])
+f_schedule_orig = make_faculty_schedule(s_schedule_orig,f_unavail = f_unavail)
 # student schedule (minimum number of faculty meetings)
 s_schedule_min = add_min_fac_meetings(s_schedule_orig,ranked_faculty$ranked_faculty,min_fac_mtg=min_fslots,f_unavail=f_unavail)
 # faculty schedule

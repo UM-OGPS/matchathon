@@ -19,6 +19,11 @@ make_faculty_schedule = function(student_schedule, f_unavail){
       }
     }
   }
-  schedule = add_fac_unavail(f_unavail,schedule)
+  if(!is.null(f_unavail)){
+    f_unavail <- f_unavail[unlist(c(f_unavail[,1])) %in% faculty,]
+    if(nrow(f_unavail) != 0){
+      schedule = add_fac_unavail(f_unavail,schedule)
+    } 
+  }
   return(schedule[,order(colnames(schedule))])
 }
