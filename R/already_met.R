@@ -14,9 +14,6 @@ already_met = function( am, rf, faculty ){
   faculty_names_l = tolower( faculty_names )
   am_fac_l = tolower( am %>% dplyr::pull( 2 ) )
   
-  #copy already met so we don't screw around with original
-  #am_c = am
-  
   #extract student name headers from ranked faculty mat
   student_names_col = dimnames( rf$ranked_faculty )[[ 2 ]]
   

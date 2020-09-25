@@ -3,7 +3,22 @@ ranked_faculty = list(ranked_faculty = structure(c("Nelson, Julia ", "Myers, Aus
 f_unavail <- structure(list(Faculty = c("Dunn, Savannah", "Dunn, Savannah", "Young, Thomas", "al-Majeed, Haaroon"), Slot = c(3, 4, 1, 1)), row.names = c(NA, -4L), class = c("tbl_df", "tbl", "data.frame"))
 
 test_that("make_student_schedule works", {
-  expect_equal(make_student_schedule(ranked_faculty$ranked_faculty,slots = 2), 
-               structure(list(`al-Abdul, Hameeda` = c("al-Majeed, Haaroon","Carter, Christopher"), `al-Allee, Ridwaan` = c("Carter, Christopher", "Nelson, Julia "), `Darity, Samantha` = c("Myers, Austin", "al-Majeed, Haaroon"), `Najera, Omar` = c("Nelson, Julia ", "Myers, Austin")), class = "data.frame", row.names = c(NA,-2L)))
-  expect_equal(make_student_schedule(ranked_faculty$ranked_faculty[,1:2],slots = 2, f_unavail = f_unavail),structure(list(`al-Abdul, Hameeda` = c("Myers, Austin", "al-Majeed, Haaroon"), `Najera, Omar` = c("Nelson, Julia ", "Myers, Austin")), class = "data.frame", row.names = c(NA,-2L)))
+  
+  fn_result <- make_student_schedule(ranked_faculty$ranked_faculty[,1:2],slots = 2, f_unavail = f_unavail)
+  expected_output <- structure(list(`al-Abdul, Hameeda` = c("Myers, Austin", "al-Majeed, Haaroon"), `Najera, Omar` = c("Nelson, Julia ", "Myers, Austin")), class = "data.frame", row.names = c(NA,-2L))
+  fn_result <- fn_result[,sort(names(fn_result))]
+  expected_output <- expected_output[,sort(names(expected_output))]
+  expect_equal(fn_result,expected_output)
+  
+  fn_result <- make_student_schedule(ranked_faculty$ranked_faculty,slots = 2)
+  expected_output <- structure(list(`al-Abdul, Hameeda` = c("al-Majeed, Haaroon","Carter, Christopher"), `al-Allee, Ridwaan` = c("Carter, Christopher", "Nelson, Julia "), `Darity, Samantha` = c("Myers, Austin", "al-Majeed, Haaroon"), `Najera, Omar` = c("Nelson, Julia ", "Myers, Austin")), class = "data.frame", row.names = c(NA,-2L))
+  fn_result <- fn_result[,sort(names(fn_result))]
+  expected_output <- expected_output[,sort(names(expected_output))]
+  expect_equal(fn_result,expected_output)
+  
+  fn_result <- make_student_schedule(ranked_faculty$ranked_faculty[,1:2],slots = 2, f_unavail = f_unavail)
+  expected_output <- structure(list(`al-Abdul, Hameeda` = c("Myers, Austin", "al-Majeed, Haaroon"), `Najera, Omar` = c("Nelson, Julia ", "Myers, Austin")), class = "data.frame", row.names = c(NA,-2L))
+  fn_result <- fn_result[,sort(names(fn_result))]
+  expected_output <- expected_output[,sort(names(expected_output))]
+  expect_equal(fn_result,expected_output)
 })

@@ -9,7 +9,7 @@ already_met(am, rf, faculty)
 \arguments{
 \item{am}{dataframe with student names as the first column and faculty names as the second column. Student names can be repeated.}
 
-\item{rf}{dataframe with student names as column names}
+\item{rf}{ranked faculty dataframe with student names as column names}
 
 \item{faculty}{dataframe where each row is a faculty member and each column is a research interest. First column is faculty names.}
 }
