@@ -1,12 +1,15 @@
 # code to prepare example data
 
-dfs <- read_in_data('data-raw/faculty.csv','data-raw/students.csv','data-raw/unavailable_faculty_times.csv','data-raw/already_met.csv')
-faculty_interests <- dfs$faculty
-student_interests <- dfs$student
-faculty_unavailable <- dfs$f_unavail
-already_met <- dfs$already_met
+all_data <- read_in_data('data-raw/faculty.csv','data-raw/students.csv','data-raw/unavailable_faculty_times.csv','data-raw/already_met.csv')
+faculty_interests <- all_data$faculty
+student_interests <- all_data$student
+faculty_unavailable <- all_data$f_unavail
+already_met <- all_data$already_met
+#survey_data <- read_in_data('data-raw/faculty_survey.csv','data-raw/student_survey.csv')
 
 usethis::use_data(faculty_interests, overwrite = TRUE)
 usethis::use_data(student_interests, overwrite = TRUE)
 usethis::use_data(faculty_unavailable, overwrite = TRUE)
 usethis::use_data(already_met, overwrite = TRUE)
+usethis::use_data(all_data, overwrite = TRUE)
+#usethis::use_data(survey_data, overwrite = TRUE)

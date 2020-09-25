@@ -14,7 +14,7 @@ matchathon = function(faculty_df,student_df,meeting_slots=12,min_fslots=NULL,f_u
   #shiny::withProgress(message = '', value = 0, {
   # get minimum number of faculty meetings
   if(is.null(min_fslots)) min_fslots = meeting_slots/2
-  if(min_fslots > meeting_slots) min_fslots = meeting_slots
+  if(min_fslots >= meeting_slots) min_fslots = meeting_slots-1
   
   f = faculty_df
   s = student_df
