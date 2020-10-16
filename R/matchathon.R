@@ -33,6 +33,9 @@ matchathon = function(faculty_df,student_df,meeting_slots=12,min_fslots=NULL,f_u
     ranked_faculty <- already_met(already_met_df, ranked_faculty, f)
   }
   #incProgress(1/n, detail = 'Creating student schedule (2nd of 3 tasks)')
+  if(!is.null(f_unavail_df)){
+    f_unavail_df <- f_unavail_df[unlist(c(f_unavail_df[,2])) <= meeting_slots,]
+  }
   s_schedule = make_student_schedule(ranked_faculty$ranked_faculty,slots=meeting_slots,f_unavail=f_unavail_df)
   s_schedule = add_min_fac_meetings(s_schedule,ranked_faculty$ranked_faculty,min_fac_mtg=min_fslots,f_unavail=f_unavail_df)
   #incProgress(1/n, detail = 'Creating faculty schedule (3rd of 3 tasks)')

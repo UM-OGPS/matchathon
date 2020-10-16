@@ -21,7 +21,8 @@ add_min_fac_meetings = function(s_schedule,ranked_faculty,min_fac_mtg=nrow(s_sch
   ct = 0
   # count number of meetings each faculty member has
   mtg_ct = table(factor(unlist(s_sched_modified),levels=fac))
-  while(min(table(factor(unlist(s_sched_modified),levels=fac))) < min_fac_mtg){
+  check <- min(table(factor(unlist(s_sched_modified),levels=fac))) < min_fac_mtg
+  while(check){
     # order so the ones with the most come first
     mtg_ct = sort(table(factor(unlist(s_sched_modified),levels=fac)),decreasing = T)
     # find faculty members with too few meetings
@@ -42,6 +43,7 @@ add_min_fac_meetings = function(s_schedule,ranked_faculty,min_fac_mtg=nrow(s_sch
         if(f %in% s_sched_modified[,s]) next
         # find worst match for student 
         current_ranks = which(ranked_faculty[,s] %in% s_schedule[,s])
+        if(length(current_ranks)-ct < 1) break 
         worst_match = current_ranks[length(current_ranks)-ct]
         worst_match = ranked_faculty[,s][worst_match]
         # check if worst match already has too few meetings
@@ -62,6 +64,9 @@ add_min_fac_meetings = function(s_schedule,ranked_faculty,min_fac_mtg=nrow(s_sch
       }
     }
     ct = ct + 1
+    tab <- table(factor(unlist(s_sched_modified),levels=fac))
+    # for now, break after 100 iterations so it's not an infinite loop (might mean some faculty don't have enough meetings, so maybe good to change this eventually)
+    if(ct > 100) break
   }
   
   return(s_sched_modified)

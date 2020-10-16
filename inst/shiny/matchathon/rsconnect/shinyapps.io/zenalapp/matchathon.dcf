@@ -1,0 +1,10 @@
+name: matchathon
+title:
+username:
+account: zenalapp
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2511850
+bundleId: 3749302
+url: https://zenalapp.shinyapps.io/matchathon/
+when: 1602862019.7982
