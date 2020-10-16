@@ -3,7 +3,7 @@ library(stringr)
 
 #incoporate saving already met
 
-read_in_data<-function(faculty_csv,student_csv){
+survey_read_in_data<-function(faculty_csv,student_csv){
   # Read in faculty data
   fac<-readr::read.csv(faculty_csv)
   fac<-as.data.frame(fac)
