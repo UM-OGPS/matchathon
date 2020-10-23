@@ -27,13 +27,7 @@ ui <- fluidPage(
             # Horizontal line ----
             tags$hr(),
             # Download buttons ----
-            uiOutput("download_ranks"),
-            tags$div(tags$br()),
-            uiOutput("download_rank_vals"),
-            tags$div(tags$br()),
-            uiOutput("download_sschedule"),
-            tags$div(tags$br()),
-            uiOutput("download_fschedule")
+            uiOutput("download_output")
             ),# end sidebar panel
         # Main panel for displaying outputs ----
         mainPanel(
@@ -177,43 +171,26 @@ server <- function(input, output) {
                     tabPanel("Faculty schedule", tableOutput("f_schedule")))
     })
     
-    # Downloadable csv of selected dataset ----   
-    output$download_ranks = renderUI({
+    # Downloadable csv of selected dataset ---- 
+
+
+    output$download_output = renderUI({
         req(input$faculty, input$students, dat())
-        downloadButton("download_ranks01",'Download matches')
+
+    # output_list <- list(
+    #   student_schedule=dat()$s_schedule,
+    #   faculty_schedule=dat()$f_schedule,
+    #   ranked_faculty_matches=dat()$ranked_faculty,
+    #   ranked_faculty_score=dat()$ranked_faculty_score)
+downloadButton("download01",'Download schedules')
     })
-    output$download_ranks01 <- downloadHandler(
-        filename = 'ranked_faculty_matches.csv',
-        content = function(file) {
-            write.csv(dat()$ranked_faculty, file, row.names = TRUE)
-        })
-    output$download_rank_vals = renderUI({
-        req(input$faculty, input$students, dat())
-        downloadButton("download_rank_vals01",'Download rank values')
-    })
-    output$download_rank_vals01 <- downloadHandler(
-        filename = 'ranked_faculty_values.csv',
-        content = function(file) {
-            write.csv(dat()$ranked_faculty_score, file, row.names = TRUE)
-        })
-    output$download_sschedule = renderUI({
-        req(input$faculty, input$students, dat())
-        downloadButton("download_sschedule01",'Download student schedule')
-    })
-    output$download_sschedule01 <- downloadHandler(
-        filename = 'student_schedule.csv',
-        content = function(file) {
-            write.csv(dat()$s_schedule, file, row.names = TRUE)
-        })
-    output$download_fschedule = renderUI({
-        req(input$faculty, input$students, dat())
-        downloadButton("download_fschedule01",'Download faculty schedule')
-    })
-    output$download_fschedule01 <- downloadHandler(
-        filename = 'faculty_schedule.csv',
-        content = function(file) {
-            write.csv(dat()$f_schedule, file, row.names = TRUE)
-        })
+
+  output$download01 <- downloadHandler(
+    filename='matchathon_schedules.xlsx',
+    content=function(file) {
+      write_xlsx(dat())
+    }
+  )
 }
 
 # Run the application 
