@@ -28,6 +28,8 @@ RoxygenNote: 7.1.1
 Imports:
     dplyr,
     readr,
-    tibble
+    tibble,
+    here,
+    shiny
 Depends: 
     R (>= 2.10)

@@ -16,6 +16,7 @@ read_in_data <- function(faculty_csv,student_csv,f_unavail_csv=NULL,already_met_
   f_unavail <- NULL
   if(!is.null(f_unavail_csv)){
     f_unavail <- readr::read_csv(f_unavail_csv)
+    f_unavail
   }
   already_met <- NULL
   if(!is.null(already_met_csv)){

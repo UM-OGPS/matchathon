@@ -16,13 +16,15 @@ add_min_fac_meetings = function(s_schedule,ranked_faculty,min_fac_mtg=nrow(s_sch
   # too_many = names(mtg_ct)[mtg_ct == nrow(s_schedule)]
   # # find faculty members with too few meetings
   # too_few = names(mtg_ct)[mtg_ct < min_fac_mtg]
+  fac <- unique(unlist(c(ranked_faculty)))
   s_sched_modified = s_schedule
   ct = 0
-  while(min(table(unlist(s_sched_modified))) < min_fac_mtg){
-    # count number of meetings each faculty member has
-    mtg_ct = table(unlist(s_sched_modified))
+  # count number of meetings each faculty member has
+  mtg_ct = table(factor(unlist(s_sched_modified),levels=fac))
+  check <- min(table(factor(unlist(s_sched_modified),levels=fac))) < min_fac_mtg
+  while(check){
     # order so the ones with the most come first
-    mtg_ct = sort(mtg_ct,decreasing = T)
+    mtg_ct = sort(table(factor(unlist(s_sched_modified),levels=fac)),decreasing = T)
     # find faculty members with too few meetings
     too_few = names(mtg_ct)[mtg_ct < min_fac_mtg]
     for(f in too_few){
@@ -36,10 +38,12 @@ add_min_fac_meetings = function(s_schedule,ranked_faculty,min_fac_mtg=nrow(s_sch
       for(j in rc_inds[,2]){
         # get student name
         s = colnames(ranked_faculty)[j]
+        if(!s %in% names(s_sched_modified)) next
         # check if student already meeting with faculty
         if(f %in% s_sched_modified[,s]) next
         # find worst match for student 
         current_ranks = which(ranked_faculty[,s] %in% s_schedule[,s])
+        if(length(current_ranks)-ct < 1) break 
         worst_match = current_ranks[length(current_ranks)-ct]
         worst_match = ranked_faculty[,s][worst_match]
         # check if worst match already has too few meetings
@@ -60,6 +64,9 @@ add_min_fac_meetings = function(s_schedule,ranked_faculty,min_fac_mtg=nrow(s_sch
       }
     }
     ct = ct + 1
+    tab <- table(factor(unlist(s_sched_modified),levels=fac))
+    # for now, break after 100 iterations so it's not an infinite loop (might mean some faculty don't have enough meetings, so maybe good to change this eventually)
+    if(ct > 100) break
   }
   
   return(s_sched_modified)
