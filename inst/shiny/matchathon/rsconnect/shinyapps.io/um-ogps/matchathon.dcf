@@ -1,0 +1,10 @@
+name: matchathon
+title:
+username:
+account: um-ogps
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3034434
+bundleId: 3749957
+url: https://um-ogps.shinyapps.io/matchathon/
+when: 1602873961.16186
