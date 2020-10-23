@@ -1,9 +1,19 @@
+#' Read in csvs
+#'
+#' @param faculty_csv csv of Google Form output from  faculty 
+#' @param student_csv csv of Google Form output from students 
+#' @param f_unavail_csv csv of faculty unavailability
+#' @param already_met_csv csv of faculty students have already met with
+#'
+#' @return two binary matrices (one for faculty and one for students) of research interests, 1 = listed interest, 0 = not an interest.
+#' @export
+
 library(dplyr)
 library(stringr)
 
 #incoporate saving already met
 
-read_in_data<-function(faculty_csv,student_csv){
+read_in_data<-function(faculty_csv,student_csv,f_unavail_csv=NULL,already_met_csv=NULL){
   # Read in faculty data
   fac<-readr::read.csv(faculty_csv)
   fac<-as.data.frame(fac)
@@ -53,6 +63,19 @@ read_in_data<-function(faculty_csv,student_csv){
   students<-students[, !(names(students) %in% drops)]
   faculty<-faculty[, !(names(faculty) %in% drops)]
   
-  return(list(faculty=faculty, students=students))
+  # read in facutly availability
+  f_unavail <-NULL
+  if(!is.null(f_unavail_csv)){
+    f_unavail <- readr::read_csv(f_unavail_csv)
+    f_unavail
+  }
+
+  # read in already met 
+  already_met <- NULL
+  if(!is.null(already_met_csv)){
+    already_met <- readr::read_csv(already_met_csv)
+  }
+
+  return(list(faculty=faculty, students=students, f_unavail=f_unavail,already_met=already_met))
 }
 
