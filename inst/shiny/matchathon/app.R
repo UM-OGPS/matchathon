@@ -37,6 +37,35 @@ ui <- fluidPage(
             ),# end sidebar panel
         # Main panel for displaying outputs ----
         mainPanel(
+          p("To help students find faculty members with mutual research interests, we use this algorithm to match first-year PhD students and faculty who are in search of trainees based on mutual research interests, and generate a schedule for a matchathon event. During the event,  students and faculty meet individually with each other for a short period of time (5-7 minutes). To learn more about the app, you can go to our", tags$a(href='https://github.com/zenalapp/matchathon',"GitHub"),'page.'),
+            p("This app generates the faculty-student matches and schedule for a matchathon event."),
+          h3("What do I input into the app?"),
+          tags$ol(
+            tags$li(tags$b("Required:"), 'csv (comma-separated values file) of faculty research interests (1=interest, 0=no interest) where the rows are the faculty and the columns are the interests.'), 
+            tags$li(tags$b("Required:"), 'csv (comma-separated values file) of student research interests (1=interest, 0=no interest) where the rows are the students and the columns are the interests.'), 
+            tags$li(tags$em("Optional:"), "csv (comma-separated values file) of faculty that students have already met with two named columns: Student and Faculty."),
+            tags$li(tags$em("Optional:"), "csv (comma-separated values file) of faculty unavailability times with two named columns: Faculty and Slot."),
+            tags$li(tags$em("Optional:"), "Number of meeting slots for the event (default: 12)."),
+            tags$li(tags$em("Optional:"), "Minimum number of faculty meetings (default: 6).")
+          ),
+          p("Notes:"),
+          tags$ul(
+            tags$li("The names of the research interest columns should be identical between the student and faculty files."), 
+            tags$li(tags$a(href="https://www.computerhope.com/issues/ch001356.htm","This website"), "explains how you can create a csv by hand or from a Microsoft Excel spreadsheet."), 
+            tags$li(tags$a(href="https://github.com/zenalapp/matchathon/tree/master/data-raw","Here"),"are example input files.")
+          ),
+          h3("How long does it take to run?"),
+          p("Longer than we'd like. If you have a lot of meeting slots, it might take a while. We're going to try to make it faster!"),
+          h3("What is the output?"),
+          tags$ol(
+            tags$li("Top faculty matches for students (top_matches.csv)."),
+            tags$li("Rank values of matches (ranked_faculty_valules.csv; note: these are somewhat difficult to interpret)."),
+            tags$li("Student schedule for the event (student_schedule.csv)."),
+            tags$li("Faculty schedule for the event (faculty_schedule.csv).")
+          ),
+          p("Scroll down to see the output of the results on the page!"),
+          h3("Help! Things aren't working!"),
+          p("Please open an issue on our", tags$a(href='https://github.com/zenalapp/matchathon/issues',"GitHub"), "page!"),
             uiOutput("tabers")
         )
     ) # end sidebarLayout
