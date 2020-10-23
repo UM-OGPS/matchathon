@@ -53,7 +53,82 @@ server <- function(input, output) {
     dat <- eventReactive(input$go01, {
         req(input$faculty)
         req(input$students)
+        
+        validate( 
+          need( tolower( tools::file_ext( input$faculty$datapath ) ) == 'csv', 'Error reading in faculty data - did you input a csv?' ),
+          need( tolower( tools::file_ext( input$students$datapath ) ) == 'csv', 'Error reading in student data - did you input a csv?' )
+        )
+        
+        if ( ! is.null( input$f_unavail$datapath ) ){
+          
+          validate( 
+            need( tolower( tools::file_ext( input$f_unavail$datapath ) ) == 'csv', 'Error reading in faculty unavailable data - did you input a csv?' )
+          )
+          
+        }
+        
+        if ( ! is.null( input$already_met$datapath ) ){
+          
+          validate( 
+            need( tolower( tools::file_ext( input$already_met$datapath ) ) == 'csv', 'Error reading in faculty unavailable data - did you input a csv?' )
+          )
+          
+        }
+        
         dfs = read_in_data(input$faculty$datapath,input$students$datapath,input$f_unavail$datapath,input$already_met$datapath)
+        
+        #print( dfs )
+        
+        #lets validate this input!
+        #first collect the class for each column in the various inputs
+        fac_dtype = unlist( lapply( dfs$faculty, class ) )
+        stud_dtype = unlist( lapply( dfs$student, class ) )
+        unavail_dtype = unlist( lapply( dfs$f_unavail, class ) )
+        met_dtype = unlist( lapply( dfs$already_met, class ) )
+        
+        validate(
+          need( fac_dtype[1] == 'character' , 'The first column of the faculty data must be names!' ),
+          need( unique( fac_dtype[ 2: length( fac_dtype ) ] ) == 'numeric' , 'The faculty interest columns must be numeric!' ),
+          
+          need( stud_dtype[1] == 'character' , 'The first column of the student data must be names!' ),
+          need( unique( stud_dtype[ 2: length( stud_dtype ) ] ) == 'numeric' , 'The student interest columns must be numeric!' )
+        )
+        
+        if ( ! is.null( input$f_unavail$datapath ) ){
+          
+          validate( 
+            #requiring the faculty unavailble data to have two columns may be too strict but it will help validate
+            need( length( unavail_dtype ) == 2, 'Faculty unavailble has unknown columns - should have two: student names and then faculty names' ),
+            need( unique( unavail_dtype ) == 'character' , 'Both faculty unavailable columns should have names!' )
+          )
+          
+        }
+        
+        if ( ! is.null( input$already_met$datapath ) ){
+          
+          validate( 
+            #requiring the faculty unavailble data to have two columns may be too strict but it will help validate
+            need( length( met_dtype ) == 2, 'Already met data has unknown columns - should have two: student names and then faculty names' ),
+            need( unique( met_dtype ) == 'character' , 'Both already met columns should have names!' )
+          )
+          
+        }
+        
+        fac_col = colnames( dfs$faculty )
+        stud_col = colnames( dfs$student )
+        unavail_col = colnames( dfs$f_unavail )
+        met_col = colnames( dfs$already_met )
+        
+        #check that the input file has column headers
+        #do this by checking the second column name is not numeric
+        #hack-y but should work since those columns were previously required to be numeric
+        validate( 
+          need( is.na( as.numeric( fac_col[2] ) ), 'Faculty column headers are numeric - please make sure your input file includes character column headers' ),
+          need( is.na( as.numeric( stud_col[2] ) ), 'Student column headers are numeric - please make sure your input file includes character column headers' )
+        )
+        
+        #is there a good way to validate the already met and unavailble column headers? Not sure right now....
+        
         results = matchathon(dfs$faculty,dfs$student,
                              meeting_slots = input$slots, min_fslots = input$fslots, f_unavail_df = dfs$f_unavail, already_met_df = dfs$already_met)
         return(results)
